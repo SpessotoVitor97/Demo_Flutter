@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import 'add_Language.dart';
+import 'language.dart';
+
 void main() {
   runApp(const MyApp()); //Widget
 }
@@ -17,37 +20,41 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/',
+      routes: {
+        "/": (context) => const MyHomePage(),
+        "/add": (context) => AddLanguage()
+      },
     );
   }
 }
 
 //toda widget é imutável
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  //List<bool> hugeList = List.generate(1000, (index) => false);
-  List<bool> selects = [false, false, false, false, false];
-  List<String> labels = [
-    "Android Nativo",
-    "iOS Nativo",
-    "React Native",
-    "Flutter",
-    "Ionic"
-  ];
+  //List<bool> hugeList = List.generate(5, (index) => false);
+  // List<bool> selects = [false, false, false, false, false];
+  // List<String> labels = [
+  //   "Android Nativo",
+  //   "iOS Nativo",
+  //   "React Native",
+  //   "Flutter",
+  //   "Ionic"
+  // ];
+
+  List<Language> itens = <Language>[];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text("Minhas Linguagens"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -62,36 +69,80 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add_circle_outline),
+        onPressed: () {
+          Future future = Navigator.pushNamed(context, "/add");
+          future.then((value) {
+            debugPrint(value.name);
+            debugPrint(value.detail);
+          });
+        },
+      ),
     );
   }
 
+  // List<Widget> buildWrapItens() {
+  //   //DART
+  //   return List.generate(5, (index) => buildChoiceItem(index));
+  // }
+
+  // ChoiceChip buildChoiceItem(int position) {
+  //   return ChoiceChip(
+  //     label: Text(labels[position]),
+  //     selected: selects[position],
+  //     onSelected: (value) {
+  //       setState(() {
+  //         selects[position] = value;
+  //       });
+  //     },
+  //   );
+  // }
+
+  // List<Widget> buildListItens() {
+  //   //DART
+  //   return [
+  //     if (selects[0]) getNativeAndroidOption,
+  //     if (selects[1]) getNativeiOSOption,
+  //     if (selects[2]) getReactNativeOption,
+  //     if (selects[3]) getFlutterOption,
+  //     if (selects[4]) getIonicOption
+  //   ];
+  // }
+
   List<Widget> buildWrapItens() {
     //DART
-    return List.generate(5, (index) => buildChoiceItem(index));
+    return itens.map((language) => buildChoiceItem(language)).toList();
   }
 
-  ChoiceChip buildChoiceItem(int position) {
+  ChoiceChip buildChoiceItem(Language position) {
     return ChoiceChip(
-      label: Text(labels[position]),
-      selected: selects[position],
+      label: Text(position.name),
+      selected: position.select,
       onSelected: (value) {
         setState(() {
-          selects[position] = value;
+          position.select = !position.select;
         });
       },
     );
   }
 
   List<Widget> buildListItens() {
-    //DART
-    return [
-      if (selects[0]) getNativeAndroidOption,
-      if (selects[1]) getNativeiOSOption,
-      if (selects[2]) getReactNativeOption,
-      if (selects[3]) getFlutterOption,
-      if (selects[4]) getIonicOption
-    ];
+    return itens
+        .where((element) => element.select)
+        .map((language) => getOption(language))
+        .toList();
+  }
+
+  Widget getOption(Language language) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.android),
+        title: Text(language.name),
+        subtitle: Text(language.detail),
+      ),
+    );
   }
 
   Widget getNativeAndroidOption = const Card(
